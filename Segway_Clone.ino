@@ -1,16 +1,17 @@
 #include "I2Cdev.h"
-#include "MPU6050_6Axis_MotionApps20.h"
+#include "ADXL345.h"
+#include "L3G4200D.h"
 #include <Wire.h>
 #include "MotorControl.h"
 #include "rawData.h"
-#include <avr/wdt.h>
+//#include <avr/wdt.h>
 
 float angle = 0.00;
-int offset = 0;
 unsigned int MotorTimeDoamin = 0;
 void setup() {
-  wdt_enable(WDTO_250MS);
+  //wdt_enable(WDTO_250MS);
   Serial.begin(115200);
+  Serial.setTimeout(10);
   Wire.begin();
   main_set();
   motorInitial();
@@ -18,14 +19,23 @@ void setup() {
 
 void loop() {
   //eastWillow degree update delay 2014/04/16
-  int i = 0;
-  for (i = 1; i <= 10; i++) {
+  //int i = 0;
+  //static float avgAngle = 0;
+  // Filter Start
+  //for(i = 0 ; i< 25;i++){
     sample_angle();
     use_CompAngle();
-    angle = (compAngleY - 180 - (offset)) / 100;
+    angle = -(compAngleX - 180);
     timer = micros();
-    wdt_reset();
-  }
+    //if(angle >= -0.15 && angle <= 0.15){
+      //angle = 0;
+  //}
+    //avgAngle += angle;
+    //getInitialAngle(angle);
+  //}
+  //avgAngle /= 25;
+  //angle = -(compAngleX - 180);
+  //wdt_reset();
   getInitialAngle(angle);
   motorUpdateSpeed(angle);
 }
